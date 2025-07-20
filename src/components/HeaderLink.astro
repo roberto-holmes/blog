@@ -4,10 +4,9 @@ import type { HTMLAttributes } from "astro/types";
 type Props = HTMLAttributes<"a">;
 
 const { href, class: className, ...props } = Astro.props;
-// TODO: Fix figuring out active page
 const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
-const subpath = pathname.match(/[^\/]+/g);
-const isActive = href === pathname || href === "/" + (subpath?.[0] || "");
+const subpath = pathname.split("/");
+const isActive = href === pathname + import.meta.env.BASE_URL.replace("/", "") || href === import.meta.env.BASE_URL + "/" + (subpath?.[1] || "");
 ---
 
 <a href={href} class:list={[className, { active: isActive }]} {...props}>
