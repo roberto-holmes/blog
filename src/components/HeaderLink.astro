@@ -5,13 +5,17 @@ type Props = HTMLAttributes<"a">;
 
 const { href, class: className, ...props } = Astro.props;
 const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
-const subpath = pathname.split("/");
-const isActive = href === pathname + import.meta.env.BASE_URL.replace("/", "") || href === import.meta.env.BASE_URL + "/" + (subpath?.[1] || "");
+const isActive = href === pathname + import.meta.env.BASE_URL.replace("/", "") || href === import.meta.env.BASE_URL + pathname;
 ---
 
 <a href={href} class:list={[className, { active: isActive }]} {...props}>
 	<slot />
 </a>
+<!-- <p>
+	pathname: {pathname} | subpath: {subpath} | href: {href} | check1: {pathname + import.meta.env.BASE_URL.replace("/", "")} | check2: {
+		import.meta.env.BASE_URL + "/" + (subpath?.join("") || "")
+	}
+</p> -->
 <style>
 	a {
 		display: inline-block;

@@ -1,0 +1,77 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+import { getCollection } from "astro:content";
+
+import "../styles/overview.css";
+import Thumbnail from "../components/Thumbnail.astro";
+
+export async function getStaticPaths() {
+	return [{ params: { lang: "en" } }, { params: { lang: "es" } }];
+}
+
+const { lang } = Astro.params;
+
+const posts_en = (await getCollection("blog_en"))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.map((post) => {
+		let id = Array.from(post.id.substring(0, post.id.length - 2));
+		id.splice(id.indexOf("/"), 0, "/en");
+		post.id = id.join("");
+		return post;
+	});
+const posts_es = (await getCollection("blog_es"))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.map((post) => {
+		let id = Array.from(post.id.substring(0, post.id.length - 2));
+		id.splice(id.indexOf("/"), 0, "/es");
+		post.id = id.join("");
+		return post;
+	});
+---
+
+<!doctype html>
+<html lang={lang}>
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="header"><h1>RH</h1></div>
+			<section>
+				<ul>
+					{
+						lang === "en" &&
+							posts_en.map((post) => (
+								<Thumbnail
+									url={post.id}
+									image={post.data.heroImage}
+									title={post.data.title}
+									date={post.data.pubDate}
+									id={post.id}
+									locale="en-gb"
+								/>
+							))
+					}
+					{
+						lang === "es" &&
+							posts_es.map((post) => (
+								<Thumbnail
+									url={post.id}
+									image={post.data.heroImage}
+									title={post.data.title}
+									date={post.data.pubDate}
+									id={post.id}
+									locale="es"
+								/>
+							))
+					}
+				</ul>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -8,4 +8,8 @@ export default defineConfig({
 	site: "https://robertoholm.es",
 	base: "blog",
 	integrations: [mdx(), sitemap()],
+	// i18n: {
+	// 	locales: ["es", "en"],
+	// 	defaultLocale: "en",
+	// },
 });
