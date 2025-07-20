@@ -1,0 +1,19 @@
+---
+import { Image } from "astro:assets";
+import FormattedDate from "./FormattedDate.astro";
+
+const { url, image, title, date, id } = Astro.props;
+---
+
+<li>
+	<a href={`/blog/${url}`}>
+		{image && <Image width={720} height={360} src={image} alt="" />}
+		<h4 class="title">{title}</h4>
+		<span class="subtitle">
+			{id !== undefined ? <p class="category">{id.split("/")[0]}</p> : <p />}
+			<p class="date">
+				<FormattedDate date={date} />
+			</p>
+		</span>
+	</a>
+</li>
