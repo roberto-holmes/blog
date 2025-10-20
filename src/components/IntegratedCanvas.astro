@@ -1,0 +1,13 @@
+---
+const { id, colour } = Astro.props;
+---
+
+<canvas id={id} style=`background-color: ${colour};`> </canvas>
+
+<style>
+	canvas {
+		width: 100%;
+		height: auto;
+		background-color: salmon;
+	}
+</style>
