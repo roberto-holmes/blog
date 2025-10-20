@@ -91,6 +91,7 @@ const bloom_en = defineCollection({
 		pubDate: z.coerce.date(),
 		updatedDate: z.coerce.date().optional(),
 		heroImage: image().optional(),
+		draft: z.boolean()
 	}),
 });
 
@@ -104,6 +105,7 @@ const bloom_es = defineCollection({
 		pubDate: z.coerce.date(),
 		updatedDate: z.coerce.date().optional(),
 		heroImage: image().optional(),
+		draft: z.boolean()
 	}),
 });
 

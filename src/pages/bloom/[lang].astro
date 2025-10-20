@@ -12,8 +12,10 @@ export async function getStaticPaths() {
 }
 const { lang } = Astro.params;
 
-const posts_en = (await getCollection("bloom_en")).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const posts_es = (await getCollection("bloom_es")).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const all_posts_en = (await getCollection("bloom_en")).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const posts_en = all_posts_en.filter((post)=>!post.data.draft);
+const all_posts_es = (await getCollection("bloom_es")).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const posts_es = all_posts_es.filter((post)=>!post.data.draft);
 ---
 
 <!doctype html>
