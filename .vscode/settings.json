@@ -1,0 +1,7 @@
+{
+	"discord.enabled": false,
+	"rust-analyzer.cargo.target": "wasm32-unknown-unknown",
+	"rust-analyzer.linkedProjects": [
+		"./src/scripts/bloom/intro/Cargo.toml"
+	]
+}
