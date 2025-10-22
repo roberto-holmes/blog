@@ -25,7 +25,7 @@ jobs:
         run: wasm-pack build --target web --no-pack -d ../../../../public/scripts/bloom/intro
       - name: Update wasm path
         working-directory: ./public/scripts/bloom/intro
-        run: sed -i -E "s/module_or_path = new URL\((['|\"].*\.wasm['|\"]), import\.meta\.url\);/module_or_path = new URL(\1, import.meta.url.replace(\/\\\\\/public\/g, \"\/blog\/public\"));/" intro.js"
+        run: sed -i -E "s/module_or_path = new URL\((['|\"].*\.wasm['|\"]), import\.meta\.url\);/module_or_path = new URL(\1, import.meta.url.replace(\/\\\\\/public\/g, \"\/blog\/public\"));/" intro.js
       - name: Install, build, and upload your site
         uses: withastro/action@v4
         # with:
