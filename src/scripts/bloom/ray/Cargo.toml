@@ -1,0 +1,53 @@
+[package]
+name = "ray_rs"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "ray"
+path = "src/main.rs"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[build-dependencies]
+anyhow = "1.0"
+fs_extra = "1.2"
+glob = "0.3"
+
+[dependencies]
+cfg-if = "1"
+winit = { version = "0.30", features = ["rwh_05"] }
+env_logger = "0.11.6"
+log = "0.4"
+wgpu = "23.0"
+pollster = "0.3"
+bytemuck = { version = "1.21", features = ["derive"] }
+anyhow = "1.0"
+cgmath = "0.18"
+tobj = { version = "3.2", default-features = false, features = ["async"] }
+
+[dependencies.web-sys]
+version = "0.3"
+features = ["console"]
+
+[dependencies.image]
+version = "0.24"
+default-features = false
+features = ["png", "jpeg"]
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+rand = "0.8"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1.6"
+console_log = "1.0"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4.30"
+web-sys = { version = "0.3", features = [
+	"Document",
+	"Window",
+	"Element",
+	"Location",
+] }
+reqwest = { version = "0.11" }
