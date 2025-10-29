@@ -420,6 +420,14 @@ fn get_random_in_unit_disk() -> vec3f {
 
 @fragment
 fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
+    // Limit ray tracing to a certain number of samples so that we free up the GPU after a while
+    // if uniforms.frame_num > 200 {
+    //     let final_render = textureLoad(radiance_samples_old, vec2u(pos.xy), 0).xyz;
+    //     textureStore(radiance_samples_new, vec2u(pos.xy), vec4(final_render, 0.));
+    //     let colour = final_render / 200;
+    //     return vec4(pow(colour, vec3(1. / 2.2)), 1.);
+    // }
+
     // Seed the Random Number Generator
     init_rng(vec2u(pos.xy), uniforms.width, uniforms.frame_num);
 
