@@ -44,6 +44,7 @@ const general_en = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: image().optional(),
+			draft: z.boolean(),
 		}),
 });
 
@@ -58,6 +59,7 @@ const general_es = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: image().optional(),
+			draft: z.boolean(),
 		}),
 });
 
@@ -72,6 +74,7 @@ const adler_en = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: image().optional(),
+			draft: z.boolean(),
 		}),
 });
 
@@ -86,6 +89,7 @@ const adler_es = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: image().optional(),
+			draft: z.boolean(),
 		}),
 });
 
@@ -130,6 +134,7 @@ const capstan_en = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: image().optional(),
+			draft: z.boolean(),
 		}),
 });
 
@@ -144,6 +149,7 @@ const capstan_es = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: image().optional(),
+			draft: z.boolean(),
 		}),
 });
 
