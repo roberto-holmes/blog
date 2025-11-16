@@ -4,5 +4,13 @@
 	"rust-analyzer.linkedProjects": [
 		"./src/scripts/bloom/intro/Cargo.toml",
 		"./src/scripts/bloom/ray/Cargo.toml",
+	],
+	"cSpell.words": [
+		"AABB",
+		"BLAS",
+		"icosphere",
+		"Khronos",
+		"TLAS",
+		"Vulkano"
 	]
 }
