@@ -42,17 +42,6 @@ use wasm_bindgen::prelude::*;
 //     fn update_fps(new_fps: f32);
 // }
 
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-}
-
-macro_rules! console_log {
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
-
 const FOCAL_DISTANCE: f32 = 4.5;
 const VFOV_DEG: f32 = 40.;
 const DOF_SCALE: f32 = 0.05;
@@ -64,7 +53,8 @@ pub const MAX_SPHERE_COUNT: usize = 100;
 pub const MAX_QUAD_COUNT: usize = 100;
 pub const MAX_TRIANGLE_COUNT: usize = 100;
 pub const MAX_OBJECT_COUNT: usize = MAX_SPHERE_COUNT + MAX_QUAD_COUNT + MAX_TRIANGLE_COUNT;
-pub const MAX_PASSES: u32 = 600; // Number of frames before we accept the result
+pub const MAX_PASSES: u32 = 100; // Number of frames before we accept the result
+pub const MAX_FPS: u32 = 10; // Number of frames before we accept the result
 
 // We need this for Rust to store our data correctly for the shaders
 #[repr(C)]
@@ -325,8 +315,7 @@ impl<'a> State<'a> {
             mapped_at_creation: false,
         });
 
-        // TODO: Figure out why chrome doesn't like the textures to be any bigger
-        let radiance_samples = helpers::create_sample_textures(&device, 4096, 4096);
+        let radiance_samples = helpers::create_sample_textures(&device, 1280, 720);
 
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             entries: &[
@@ -696,23 +685,15 @@ impl<'a> State<'a> {
             // Calculate FPS
             let current_date = Date::new_0();
             let elapsed = current_date.get_milliseconds() - self.last_frame_time.get_milliseconds();
-            let fps = (1. / elapsed as f32) * 1000.;
-            if fps.is_normal() {
-                self.frame_rate_history[self.frame_rate_pos] = fps;
 
-                let mut fps_mean = 0.;
-                for f in self.frame_rate_history {
-                    fps_mean += f;
-                }
-                fps_mean /= self.frame_rate_history.len() as f32;
-
-                // unsafe {
-                //     update_fps(fps_mean as f32);
-                // }
-                self.last_frame_time = current_date;
-                self.frame_rate_pos += 1;
-                self.frame_rate_pos %= self.frame_rate_history.len();
+            // Limit fps so that low performance systems don't tank when rendering the page
+            if elapsed < 1000 / MAX_FPS {
+                return Ok(());
             }
+
+            self.last_frame_time = current_date;
+            self.frame_rate_pos += 1;
+            self.frame_rate_pos %= self.frame_rate_history.len();
         }
 
         // Update Uniforms
@@ -801,8 +782,7 @@ impl<'a> State<'a> {
     }
 }
 
-// #[cfg_attr(target_arch = "wasm32", wasm_bindgen(start))]
-#[wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub async fn run(canvas_id: &str) {
     cfg_if::cfg_if! {
         if #[cfg(target_arch = "wasm32")] {
@@ -824,43 +804,19 @@ pub async fn run(canvas_id: &str) {
 
     #[cfg(target_arch = "wasm32")]
     {
-        // Winit prevents sizing with CSS, so we have to set
-        // the size manually when on web.
-        // use winit::dpi::{LogicalSize, PhysicalSize};
         use winit::platform::web::WindowAttributesExtWebSys;
-        log::info!("Getting document");
         let document = web_sys::window().unwrap().document().unwrap();
-        console_log!("Have document");
         let canvas = document.get_element_by_id(canvas_id).unwrap();
         let canvas: web_sys::HtmlCanvasElement = canvas
             .dyn_into::<web_sys::HtmlCanvasElement>()
             .map_err(|_| ())
             .unwrap();
-        console_log!("Have canvas");
 
         window_attributes = window_attributes.with_canvas(Some(canvas));
-
-        // web_sys::window()
-        //     .and_then(|win| {
-        //         let width = win.inner_width().unwrap().as_f64().unwrap() as u32;
-        //         let height = win.inner_height().unwrap().as_f64().unwrap() as u32;
-        //         let factor = window.scale_factor();
-        //         let logical = LogicalSize { width, height };
-        //         let PhysicalSize { width, height }: PhysicalSize<u32> = logical.to_physical(factor);
-        //         let _ = window.request_inner_size(PhysicalSize::new(width, height));
-        //         win.document()
-        //     })
-        //     .and_then(|doc| {
-        //         let dst = doc.get_element_by_id("ray")?;
-        //         let canvas = web_sys::Element::from(window.canvas()?);
-        //         dst.append_child(&canvas).ok()?;
-        //         Some(())
-        //     })
-        //     .expect("Couldn't append canvas to document body.");
+        window_attributes = window_attributes.with_active(false); // Don't jump directly to the canvas
     }
 
     let window = event_loop.create_window(window_attributes).unwrap();
-    // let window = window_builder.build(&event_loop).unwrap();
 
     // State::new uses async code, so we're going to wait for it to finish
     let mut state = State::new(&window, limits).await;
