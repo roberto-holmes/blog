@@ -1,0 +1,19 @@
+---
+// const { text } = Astro.props;
+---
+
+<div class="caption-container">
+	<p class="caption"><slot /></p>
+</div>
+
+<style>
+	.caption-container {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		margin-top: -2em;
+	}
+	.caption {
+		font-style: italic;
+	}
+</style>

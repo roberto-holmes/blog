@@ -9,6 +9,7 @@ draft: false
 <script type="module" src="../../../public/scripts/bloom/native.ts"></script>
 
 import IntegratedCanvas from "../../components/IntegratedCanvas.astro";
+import Caption from "../../components/Caption.astro";
 
 # Ray Tracing in One Weekend
 
@@ -16,7 +17,7 @@ A few months ago I was looking for something new to do and I came across [Ray Tr
 
 ![Final product after following Ray Tracing in One Weekend](../../assets/RayTracingInOneWeekend.jpg)
 
-## TODO: Caption
+<Caption>Final product after following Ray Tracing in One Weekend</Caption>
 
 I did really enjoy going through the Ray Tracing in One Weekend book but once I got my teeth in it, it didn't take too long to complete. To be fair, there's a lot more content in [the rest of the series](https://raytracing.github.io/), all written in a similar style but I realised that I needed something more: speed. Every time I changed something, I would have to wait a couple of minutes to render the image and see the result and that started getting annoying quite quickly, especially as I knew there was a better way.
 
@@ -28,21 +29,18 @@ Thankfully, some wonderful people have started on a port of the [Ray Tracing in 
 
 It was time for a slight detour to learn wgpu. I found this [Learn Wgpu](https://sotrh.github.io/learn-wgpu/) guide that seemed like as good a starting point as anything else. As this was my first venture into graphics programming and rasterisation, it took me a little while to understand all the concepts but I would recommend this guide for anyone wanting to start off with wgpu.
 
-## TODO: Insert interactive canvas with wgpu triangle
-
 <IntegratedCanvas id="triangle" colour="navy" />
+<Caption>Interactive canvas with a GPU rendered triangle and a background colour based on mouse position</Caption>
 
 With my first wgpu program under my belt, it was time to tackle ray tracing once again. To be fair, the GPU Ray Tracing book is intended as a starting point for learning GPU programming and wgpu but, when I was going through this in early 2025, it was incomplete and I found that following another tutorial beforehand helped fill the gaps in for me. It may be that at the time that you read this, you could skip the Learn Wgpu if you were to follow along.
 
-## TODO: Insert same ray tracer but in GPU
-
 <IntegratedCanvas id="gpu-port" colour="salmon" />
+<Caption>Ray Tracing in One Weekend running on your GPU</Caption>
 
 Anyways, the upfront work necessary to display anything was a lot higher now that I was using a graphics API but it was all worth it once the ray tracing renderer was up and running and I could now make changes in near realtime. This revelation opened up a world of possibilities for me, facilitated by the next books in the Ray Tracing in One Weekend series and by Sebastian Lague's [Coding Adventures](): "What if I want to render triangles too?" - ([Möller–Trumbore](https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm)); "oh and what about if I want an object to emit light instead of getting all the light from the background?" - emissive materials; "I've heard about this [Bounding Volume Hierarchy (BVH)](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy) thing, how would I do that?" - [Coding Adventure](), and "I have an idea, I wonder what it would look like if I could click on object and it would highlight them" - this one was a little more work as I needed to learn how to interact with the windowing API and input system but I'm happy with the result. Figuring out how to interact with the windowing API also opened up the possibilities for camera controls, which made the renderer so much more fun to play with.
 
-## TODO: Insert ray tracer with modifications but in GPU
-
 <IntegratedCanvas id="gpu-port-modified" colour="aquamarine" />
+<Caption>A renderer with a movable Camera, a BVH, emissive materials, triangles, spheres, and adjustable depth of field</Caption>
 
 Even though with the number of objects and scenes that I was creating performance wasn't an issue, I was finding the optimisations fascinating. This is why I implemented BVH before it was strictly required. The problem was that there was one optimisation I had in mind that none of the documentation I was going through was answering. Ray Tracing has become quite the buzzword recently, especially in the context of graphics cards and hardware, and I am lucky enough to have a GPU with hardware Ray Tracing acceleration. How can I use this in my renderer?
 

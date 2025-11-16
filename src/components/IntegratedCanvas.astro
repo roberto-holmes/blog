@@ -2,12 +2,15 @@
 const { id, colour } = Astro.props;
 ---
 
-<canvas id={id} style=`background-color: ${colour};`> </canvas>
+<p>
+	<canvas id={id} style=`background-color: ${colour};`> </canvas>
+</p>
 
 <style>
 	canvas {
 		width: 100%;
 		height: auto;
+		aspect-ratio: 16/9;
 		background-color: salmon;
 	}
 </style>
