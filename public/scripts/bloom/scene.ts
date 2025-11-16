@@ -45,8 +45,10 @@ export function createRTIOWScene(): Float32Array {
 	sceneArray[44] = 0.67; // Refraction index
 
 	let sphereNum = 4;
-	for (let a = -11; a < 11; a++) {
-		for (let b = -11; b < 11; b++) {
+	const spheresPerQuadrant = 11;
+	// const spheresPerQuadrant = 5;
+	for (let a = -spheresPerQuadrant; a < spheresPerQuadrant; a++) {
+		for (let b = -spheresPerQuadrant; b < spheresPerQuadrant; b++) {
 			sceneArray[sphereNum * sphereSize + 0] = a + 0.9 * Math.random(); // Center x
 			sceneArray[sphereNum * sphereSize + 1] = 0.2; // Center y
 			sceneArray[sphereNum * sphereSize + 2] = b + 0.9 * Math.random(); // Center z

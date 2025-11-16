@@ -94,7 +94,7 @@ struct Scatter {
 const F32_MAX: f32 = 3.40282346638528859812e+38;
 const EPSILON: f32 = 1e-2;
 
-const FOCAL_DISTANCE: f32 = 2.;
+const FOCAL_DISTANCE: f32 = 4.;
 const MAX_PATH_LENGTH: u32 = 8u;
 
 fn sky_colour(ray: Ray) ->vec3f {
@@ -237,12 +237,10 @@ fn intersect_scene(ray: Ray) -> Intersection {
 	return no_intersection();
 }
 
-
 // @fragment
 // fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4f {
 // 	return vec4f(pos.x/f32(uniforms.width), pos.y/f32(uniforms.height), cos(f32(uniforms.frame_num)/60.0) *.5 +.5, 1);
 // }
-
 
 @fragment
 fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
