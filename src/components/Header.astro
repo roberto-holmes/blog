@@ -12,9 +12,9 @@ const current_lang = Astro.url.pathname.includes("/es") ? "es" : "en";
 		<h2><a href=`${site_url}`>RH</a></h2>
 		<div class="internal-links">
 			<HeaderLink href=`${base_url}/${current_lang}`>{current_lang === "en" ? "Home" : "Inicio"}</HeaderLink>
-			<HeaderLink href=`${base_url}/adler/${current_lang}`>Adler</HeaderLink>
-			<HeaderLink href=`${base_url}/bloom/${current_lang}`>Bloom</HeaderLink>
-			<HeaderLink href=`${base_url}/capstan/${current_lang}`>Capstan</HeaderLink>
+			<!-- <HeaderLink href=`${base_url}/adler/${current_lang}`>Adler</HeaderLink> -->
+			<!-- <HeaderLink href=`${base_url}/bloom/${current_lang}`>Bloom</HeaderLink> -->
+			<!-- <HeaderLink href=`${base_url}/capstan/${current_lang}`>Capstan</HeaderLink> -->
 		</div>
 		<div class="internal-links">
 			<a href={Astro.url.pathname.replace("/es", "/en")}>en</a>
