@@ -1,0 +1,42 @@
+---
+import { undefined } from "astro:schema";
+
+// interface Props {
+// 	title?: string;
+// 	text: string;
+// }
+
+const { title, text } = Astro.props;
+---
+
+<aside>
+	{title && <h3>{title}</h3>}
+	<div>
+		<slot />
+	</div>
+</aside>
+
+<style>
+	.aside-container {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+	}
+	aside {
+		text-align: justify;
+		background-color: lavender;
+		border-radius: 10px;
+		padding: 10px;
+		margin: auto 1em;
+		margin-bottom: 2em;
+
+		h3 {
+			padding: 10px;
+			text-align: center;
+		}
+
+		p {
+			margin: 0;
+		}
+	}
+</style>

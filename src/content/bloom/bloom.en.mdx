@@ -21,6 +21,12 @@ A few months ago I was looking for something new to do and I came across [Ray Tr
 
 I did really enjoy going through the Ray Tracing in One Weekend book but once I got my teeth in it, it didn't take too long to complete. To be fair, there's a lot more content in [the rest of the series](https://raytracing.github.io/), all written in a similar style but I realised that I needed something more: speed. Every time I changed something, I would have to wait a couple of minutes to render the image and see the result and that started getting annoying quite quickly, especially as I knew there was a better way.
 
+<Aside>
+	Quickly before we get into it, I would like to apologise for any performance issues when on this page. I'm still working on how best to
+	integrate interactive elements into blog posts but for now I have artificially limited everything to 10 fps in the hope that it won't tax
+	lower power hardware too much.
+</Aside>
+
 # Graphics Programming
 
 The renderer you create by the end of the book is single threaded which is the main performance bottleneck (on modern desktop CPUs) as only one pixel can be computed at a time. I could have set up multithreading so that the entire might of the CPU could be used to perform the render, instead of just a small fraction, but most computers these days have a component designed for this task - the GPU. Graphics Processing Units have a fundamentally different architecture from CPUs that allow them to essentially run heavily multithreaded software with tens or hundreds of thousands of threads (as opposed to the tens of threads on a good CPU). They can do this for reasons that I am still trying to get my head around. Suffice to say, this feature makes them perfect for generating pixel data and makes them the ideal tool for a ray tracer. (There are certain ray tracing renderers that cannot take advantage of the GPU architecture and perform best on the CPU but that's not what we're working on today).
@@ -54,9 +60,15 @@ I did a lot of reading around before comitting to start anything and the consens
 
 I did consider using a Vulkan wrapper like [Vulkano](https://github.com/vulkano-rs/vulkano) but I decided that if I was going to take the plunge and learn Vulkan, I might as well learn the actual API instead of an abstraction layer and then I should hopefully develop some more general knowledge and should have more resources to learn from. Regardless, at the end of the day this is a personal project and if I want to spend months studying documentation, no-one can stop me.
 
-> ## The Triangle (an aside)
->
-> As an aside, one thing I learned during this journey is that the graphical programming equivalent of a "Hello World" application is displaying a plain coloured triangle. I'm quite familiar with using a "Hello World" printout as a starting point for software and blinking an LED for firmware but I can't say I'd considered what the ubiquotous basic program would be if the desired output was a display. A thought that came to me is that an interesting benchmark that could be used with the triangle, or even Hello World or Blinky, is how long it takes to write the software. There are many approaches that could be taken: physical time taken from a clean project or clean system, or number of keyboard inputs or characters required. You could even make a Docker image starting from the same base and compare size of the dockerfile. Anyways, that's something for another time. At the moment it's time to discover what led to this train of thought.
+<Aside title="The Triangle">
+	As an aside, one thing I learned during this journey is that the graphical programming equivalent of a "Hello World" application is
+	displaying a plain coloured triangle. I'm quite familiar with using a "Hello World" printout as a starting point for software and blinking
+	an LED for firmware but I can't say I'd considered what the ubiquitous basic program would be if the desired output was a display. A
+	thought that came to me is that an interesting benchmark that could be used with the triangle, or even Hello World or Blinky, is how long
+	it takes to write the software. There are many approaches that could be taken: physical time taken from a clean project or clean system,
+	or number of keyboard inputs or characters required. You could even make a Docker image starting from the same base and compare size of
+	the dockerfile. Anyways, that's something for another time. At the moment it's time to discover what led to this train of thought.
+</Aside>
 
 ## Ash
 
@@ -84,9 +96,14 @@ To get a bit technical, my software ray tracing solution was originally performe
 
 The problem with this is that the hardware ray tracing can't be performed in either of these stages. The ray tracing stage is a distinct process that needs to be set up and run separately. In my case, the purpose of this stage is to take the acceleration structure and produce an image with the camera's view of the scene. This image can then be used by the fragmentation shader to be displayed on the vertices provided by the vertex shader (i.e. shown on the display). Now, although the ray tracing shader can be essentially inserted into the standard vertex + fragmentation shader pipeline, there's a new topic we need to discuss.
 
-> ## Async Compute (an aside)
->
-> You may be familiar with how CPUs support multithreading where multiple pieces of software can be running at the same time and hardware resources can be distributed between them so that one can run while the other is waiting on something or both can run simultaneously if the hardware can support this. GPUs support a similar feature in the form of queues. A queue contains a list of commands that you want the GPU to execute on after the other. For example, the typical rasterisation pipeline can be run in a single queue where the vertices are generated, coloured, and then copied into the swapchain to be displayed. However, this queue will be locked to only happen once per frame. What do you do if you want to run something multiple times per frame?
+<Aside title="Async Compute">
+	You may be familiar with how CPUs support multithreading where multiple pieces of software can be running at the same time and hardware
+	resources can be distributed between them so that one can run while the other is waiting on something or both can run simultaneously if
+	the hardware can support this. GPUs support a similar feature in the form of queues. A queue contains a list of commands that you want the
+	GPU to execute on after the other. For example, the typical rasterisation pipeline can be run in a single queue where the vertices are
+	generated, coloured, and then copied into the swapchain to be displayed. However, this queue will be locked to only happen once per frame.
+	What do you do if you want to run something multiple times per frame?
+</Aside>
 
 Compute shaders are very versatile tools that can be used to run whatever you want on the GPU. For example, if you were to write a physics engine on the GPU, this would likely want to be run from a compute shader. But physics engines should not be tied to FPS as that can cause some very odd behaviour at frame rates that are different from what you expect. Ideally, they should be synchronised with a clock and run every x milliseconds. This means that there is no real way to run this shader in the queue. We're going to need another queue.
 
