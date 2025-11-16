@@ -65,6 +65,14 @@ export class Camera {
 		console.log(this._up);
 	}
 
+	orbit(du: number, dv: number) {
+		// const MAX_ALT = Math.PI / 2 - 1e-6;
+		// this._altitude = Math.clam
+		this._azimuth += du;
+		this._azimuth %= 2 * Math.PI;
+		this.updateArray();
+	}
+
 	updateArray() {
 		const y = Math.sin(this._altitude);
 		const xz_scale = Math.cos(this._altitude);

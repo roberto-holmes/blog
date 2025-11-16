@@ -103,6 +103,8 @@ class Demo {
 let triangle: Triangle | null = null;
 let ray: Demo | null = null;
 
+let lastTimestamp = 0;
+
 async function wgpu() {
 	const adapter = await navigator.gpu.requestAdapter();
 	if (!adapter) {
@@ -327,8 +329,6 @@ function initRay(canvas_id: string, device: GPUDevice) {
 	);
 	camera.updateArray();
 
-	console.log(camera);
-
 	const cameraBuffer = device.createBuffer({
 		label: "Camera Buffer",
 		size: camera.array.byteLength,
@@ -379,12 +379,17 @@ function initRay(canvas_id: string, device: GPUDevice) {
 }
 
 function render(timestamp: number) {
+	const frameTime_ms = timestamp - lastTimestamp;
+
 	// Triangle
 	if (triangle !== null) {
 		renderTriangle(triangle);
 	}
-	if (ray !== null) {
+	// Limit
+	if (frameTime_ms > 100 && ray !== null) {
+		ray.camera.orbit(-0.01, 0.0);
 		renderRay(ray);
+		lastTimestamp = timestamp;
 	}
 
 	requestAnimationFrame(render);
