@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 
 const { lang } = Astro.params;
 
-const posts_en = (await getCollection("blog_en"))
+const all_posts_en = (await getCollection("blog_en"))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.map((post) => {
 		let id = Array.from(post.id.substring(0, post.id.length - 2));
@@ -22,7 +22,8 @@ const posts_en = (await getCollection("blog_en"))
 		post.id = id.join("");
 		return post;
 	});
-const posts_es = (await getCollection("blog_es"))
+const posts_en = all_posts_en.filter((post) => !post.data.draft);
+const all_posts_es = (await getCollection("blog_es"))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.map((post) => {
 		let id = Array.from(post.id.substring(0, post.id.length - 2));
@@ -30,6 +31,7 @@ const posts_es = (await getCollection("blog_es"))
 		post.id = id.join("");
 		return post;
 	});
+const posts_es = all_posts_es.filter((post) => !post.data.draft);
 ---
 
 <!doctype html>
