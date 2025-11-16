@@ -1,8 +1,8 @@
 ---
-title: "A Toy Engine"
+title: "Un Motor de Videojuego"
 description: "The origin of Bloom"
-pubDate: "2025/07/17"
-heroImage: "../../assets/blog-placeholder-3.jpg"
+pubDate: "2025/11/16"
+heroImage: "../../assets/RayTracingInOneWeekend.jpg"
 draft: false
 ---
 
