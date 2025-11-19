@@ -269,6 +269,20 @@ function initTriangle(canvas_id: string, device: GPUDevice) {
 		triangle.mouseX = (e.clientX - rect.left) / rect.width; // scale mouse coordinates after they have
 		triangle.mouseY = (e.clientY - rect.top) / rect.height; // been adjusted to be relative to element
 	});
+
+	// TODO: Test listener for touch events
+	canvas.addEventListener("touchmove", (e) => {
+		if (triangle === null) {
+			return;
+		}
+		if (e.touches[0] === undefined) {
+			return;
+		}
+		let rect = canvas.getBoundingClientRect(); // abs. size of element
+
+		triangle.mouseX = (e.touches[0].clientX - rect.left) / rect.width; // scale mouse coordinates after they have
+		triangle.mouseY = (e.touches[0].clientY - rect.top) / rect.height; // been adjusted to be relative to element
+	});
 }
 
 function initRay(canvas_id: string, device: GPUDevice) {

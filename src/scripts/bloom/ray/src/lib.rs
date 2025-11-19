@@ -121,6 +121,7 @@ struct State<'a> {
     mouse_position: PhysicalPosition<f64>,
     mouse_pressed_position: [PhysicalPosition<f64>; 3],
     mouse_button_pressed: [bool; 3],
+    touch_finger_id: Option<u64>,
     ctrl_pressed: bool,
 
     #[cfg(target_arch = "wasm32")]
@@ -505,6 +506,7 @@ impl<'a> State<'a> {
             mouse_pressed_position: [PhysicalPosition { x: 0., y: 0. }; 3],
             mouse_button_pressed: [false; 3],
             ctrl_pressed: false,
+            touch_finger_id: None,
 
             #[cfg(target_arch = "wasm32")]
             last_frame_time: Date::new_0(),
@@ -543,6 +545,28 @@ impl<'a> State<'a> {
         match event {
             WindowEvent::CursorMoved { position, .. } => {
                 self.mouse_position = *position;
+                true
+            }
+            WindowEvent::Touch(touch) => {
+                self.mouse_position = touch.location;
+                // We are only going to support a single finger, all others will be ignored
+                if self.touch_finger_id == None && touch.phase == TouchPhase::Started {
+                    self.touch_finger_id = Some(touch.id);
+                    let event = DeviceEvent::Button {
+                        button: 0, // Set all touchscreen inputs as left mouse clicks
+                        state: ElementState::Pressed,
+                    };
+                    self.mouse_input(&event);
+                } else if touch.phase == TouchPhase::Cancelled
+                    || (self.touch_finger_id == Some(touch.id) && touch.phase == TouchPhase::Ended)
+                {
+                    let event = DeviceEvent::Button {
+                        button: 0,
+                        state: ElementState::Released,
+                    };
+                    self.mouse_input(&event);
+                    self.touch_finger_id = None;
+                }
                 true
             }
             WindowEvent::KeyboardInput {
