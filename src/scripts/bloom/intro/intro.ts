@@ -6,13 +6,13 @@ import { ray_shader_code } from "./wgsl.js";
 
 window.onload = () => {
 	if (!navigator.gpu) {
-		// Display warning and hide the FPS counter
+		// TODO: Display warning
 		// (document.getElementById("webgpu-missing") as HTMLDivElement).style.display = "block";
 		throw new Error("WebGPU is not supported on your browser. Consider enabling it or checking out http://webgpu.io for more information.");
 	}
 	wgpu();
 	init().then(() => {
-		console.log("WASM Loaded");
+		// console.log("WASM Loaded");
 		run("gpu-port-modified");
 	});
 };
@@ -384,7 +384,6 @@ function initRay(canvas_id: string, device: GPUDevice) {
 		},
 	});
 
-	console.log("Canvas (" + canvas.width + ", " + canvas.height + ")");
 	const uniformArray = new Uint32Array([0, canvas.width, canvas.height]);
 	const uniformBuffer = device.createBuffer({
 		label: "Uniforms",
@@ -510,7 +509,7 @@ function renderRay(ray: Demo) {
 	pass.setPipeline(ray.pipeline);
 	pass.setVertexBuffer(0, ray.vertexBuffer);
 
-	if (ray.uniformBuffers !== null) {
+	if (ray.uniformBuffers !== null && ray.uniformBuffers[0] !== undefined) {
 		ray.uniformBuffers[0].array[0] = ray.frameCount;
 	}
 
