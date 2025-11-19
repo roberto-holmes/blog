@@ -1,0 +1,16 @@
+{
+	"extends": "../../tsconfig.json",
+	"include": [
+		"**/*"
+	],
+	"compilerOptions": {
+		// We can't do this anymore if transpiling
+		"allowImportingTsExtensions": false,
+		// Astro directly run TypeScript code, but we want to transpile.
+		"noEmit": false,
+		"outDir": "../../public/scripts",
+		"types": [
+			"@webgpu/types"
+		]
+	}
+}

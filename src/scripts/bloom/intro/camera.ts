@@ -60,12 +60,9 @@ export class Camera {
 		this._altitude = Math.asin(negW.y);
 
 		this.array = new Float32Array(16);
-
-		console.log(":");
-		console.log(this._up);
 	}
 
-	orbit(du: number, dv: number) {
+	orbit(du: number, _dv: number) {
 		// const MAX_ALT = Math.PI / 2 - 1e-6;
 		// this._altitude = Math.clam
 		this._azimuth += du;

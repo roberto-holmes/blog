@@ -1,10 +1,10 @@
 {
-  "name": "",
+  "name": "blog",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "./build.sh",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -16,6 +16,7 @@
     "sharp": "^0.34.2"
   },
   "devDependencies": {
-    "@webgpu/types": "^0.1.66"
+    "@webgpu/types": "^0.1.66",
+    "typescript": "^5.9.3"
   }
 }
