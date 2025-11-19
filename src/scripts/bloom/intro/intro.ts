@@ -30,6 +30,7 @@ class Buffer {
 }
 
 class Triangle {
+	element: HTMLElement;
 	context: GPUCanvasContext;
 	device: GPUDevice;
 	pipeline: GPURenderPipeline;
@@ -40,8 +41,17 @@ class Triangle {
 	mouseY: number;
 
 	frameCount: number;
+	is_visible: boolean;
 
-	constructor(context: GPUCanvasContext, device: GPUDevice, pipeline: GPURenderPipeline, vertexBuffer: GPUBuffer, vertices: Float32Array) {
+	constructor(
+		element: HTMLElement,
+		context: GPUCanvasContext,
+		device: GPUDevice,
+		pipeline: GPURenderPipeline,
+		vertexBuffer: GPUBuffer,
+		vertices: Float32Array
+	) {
+		this.element = element;
 		this.context = context;
 		this.device = device;
 		this.pipeline = pipeline;
@@ -52,10 +62,12 @@ class Triangle {
 		this.mouseY = 0.0;
 
 		this.frameCount = 0;
+		this.is_visible = false;
 	}
 }
 
 class Demo {
+	element: HTMLElement;
 	context: GPUCanvasContext;
 	device: GPUDevice;
 	pipeline: GPURenderPipeline;
@@ -71,8 +83,10 @@ class Demo {
 	mouseY: number;
 
 	frameCount: number;
+	is_visible: boolean;
 
 	constructor(
+		element: HTMLElement,
 		context: GPUCanvasContext,
 		device: GPUDevice,
 		pipeline: GPURenderPipeline,
@@ -83,6 +97,7 @@ class Demo {
 		storageBuffers: Buffer[],
 		camera: Camera
 	) {
+		this.element = element;
 		this.context = context;
 		this.device = device;
 		this.pipeline = pipeline;
@@ -98,6 +113,7 @@ class Demo {
 		this.camera = camera;
 
 		this.frameCount = 0;
+		this.is_visible = false;
 	}
 }
 
@@ -106,22 +122,62 @@ let ray: Demo | null = null;
 
 let lastTimestamp = 0;
 
+const triangle_canvas_name = "triangle";
+const gpu_port_canvas_name = "gpu-port";
+
+// ------------------- Only Render Elements that are in the viewport -------------------
+
+function isElementInViewport(el: HTMLElement): boolean {
+	const rect = el.getBoundingClientRect();
+	// console.log(rect);
+	// console.log([rect.top, rect.bottom, window.innerHeight]);
+	// console.log([window.innerHeight, document.documentElement.clientHeight, window.innerHeight || document.documentElement.clientHeight]);
+	// Return true if any of the element is visible
+	return (
+		(rect.top >= 0 || rect.bottom >= 0) &&
+		(rect.left >= 0 || rect.right >= 0) &&
+		(rect.top <= window.innerHeight || rect.bottom <= window.innerHeight) &&
+		(rect.right <= window.innerWidth || rect.left <= window.innerWidth)
+	);
+}
+
+function visibilityHandler(_e: Event) {
+	// We want to keep track if the canvas is visible in the viewport so we don't waste compute
+	if (triangle !== null && isElementInViewport(triangle.element)) {
+		triangle.is_visible = true;
+	} else if (triangle !== null) {
+		triangle.is_visible = false;
+	}
+	if (ray !== null && isElementInViewport(ray.element)) {
+		ray.is_visible = true;
+	} else if (ray !== null) {
+		ray.is_visible = false;
+	}
+}
+
+addEventListener("DOMContentLoaded", visibilityHandler);
+addEventListener("load", visibilityHandler);
+addEventListener("scroll", visibilityHandler);
+addEventListener("resize", visibilityHandler);
+
+// -------------------------------------- WebGPU --------------------------------------
+
 async function wgpu() {
 	const adapter = await navigator.gpu.requestAdapter();
 	if (!adapter) {
 		throw new Error("No appropriate GPUAdapter found.");
 	}
 	const device = await adapter.requestDevice();
-	console.log("Running native webgpu program");
 
-	initTriangle("triangle", device);
-	initRay("gpu-port", device);
+	initTriangle(triangle_canvas_name, device);
+	initRay(gpu_port_canvas_name, device);
 
 	render(0.0);
 }
 
 function initTriangle(canvas_id: string, device: GPUDevice) {
-	let canvas = document.getElementById(canvas_id)! as HTMLCanvasElement;
+	const canvas_element = document.getElementById(canvas_id)!;
+	let canvas = canvas_element as HTMLCanvasElement;
 	canvas.width = canvas.clientWidth * window.devicePixelRatio;
 	canvas.height = canvas.clientHeight * window.devicePixelRatio;
 
@@ -202,7 +258,7 @@ function initTriangle(canvas_id: string, device: GPUDevice) {
 		},
 	});
 
-	triangle = new Triangle(context, device, pipeline, vertexBuffer, vertices);
+	triangle = new Triangle(canvas_element, context, device, pipeline, vertexBuffer, vertices);
 
 	canvas.addEventListener("mousemove", (e) => {
 		if (triangle === null) {
@@ -216,7 +272,8 @@ function initTriangle(canvas_id: string, device: GPUDevice) {
 }
 
 function initRay(canvas_id: string, device: GPUDevice) {
-	let canvas = document.getElementById(canvas_id)! as HTMLCanvasElement;
+	const canvas_element = document.getElementById(canvas_id)!;
+	let canvas = canvas_element as HTMLCanvasElement;
 	canvas.width = canvas.clientWidth * window.devicePixelRatio;
 	canvas.height = canvas.clientHeight * window.devicePixelRatio;
 
@@ -366,7 +423,7 @@ function initRay(canvas_id: string, device: GPUDevice) {
 
 	const storageArrays = [new Buffer(sceneArray, sceneBuffer)];
 
-	ray = new Demo(context, device, pipeline, vertexBuffer, vertices, bindGroup, uniformBuffers, storageArrays, camera);
+	ray = new Demo(canvas_element, context, device, pipeline, vertexBuffer, vertices, bindGroup, uniformBuffers, storageArrays, camera);
 
 	canvas.addEventListener("mousemove", (e) => {
 		if (ray === null) {
@@ -383,11 +440,11 @@ function render(timestamp: number) {
 	const frameTime_ms = timestamp - lastTimestamp;
 
 	// Triangle
-	if (triangle !== null) {
+	if (triangle !== null && triangle.is_visible) {
 		renderTriangle(triangle);
 	}
 	// Limit
-	if (frameTime_ms > 100 && ray !== null) {
+	if (frameTime_ms > 100 && ray !== null && ray.is_visible) {
 		ray.camera.orbit(-0.01, 0.0);
 		renderRay(ray);
 		lastTimestamp = timestamp;
