@@ -283,6 +283,10 @@ function initTriangle(canvas_id: string, device: GPUDevice) {
 		triangle.mouseX = (e.touches[0].clientX - rect.left) / rect.width; // scale mouse coordinates after they have
 		triangle.mouseY = (e.touches[0].clientY - rect.top) / rect.height; // been adjusted to be relative to element
 	});
+
+	// Check if the canvas is immediately visible
+	let dummy_event = new Event("");
+	visibilityHandler(dummy_event);
 }
 
 function initRay(canvas_id: string, device: GPUDevice) {
@@ -447,6 +451,10 @@ function initRay(canvas_id: string, device: GPUDevice) {
 		ray.mouseX = (e.clientX - rect.left) / rect.width; // scale mouse coordinates after they have
 		ray.mouseY = (e.clientY - rect.top) / rect.height; // been adjusted to be relative to element
 	});
+
+	// Check if the canvas is immediately visible
+	let dummy_event = new Event("");
+	visibilityHandler(dummy_event);
 }
 
 function render(timestamp: number) {
