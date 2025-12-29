@@ -41,12 +41,12 @@ It was time for a slight detour to learn wgpu. I found this [Learn Wgpu](https:/
 
 With my first wgpu program under my belt, it was time to tackle ray tracing once again. To be fair, the GPU Ray Tracing book is intended as a starting point for learning GPU programming and wgpu but, when I was going through this in early 2025, it was incomplete and I found that following another tutorial beforehand helped fill the gaps in for me. It may be that at the time that you read this, you could skip the Learn Wgpu if you were to follow along.
 
-<IntegratedCanvas id="gpu-port" colour="salmon" />
+<IntegratedCanvas id="gpu-port" colour="salmon" cover="true" />
 <Caption>Ray Tracing in One Weekend running on your GPU</Caption>
 
 Anyways, the upfront work necessary to display anything was a lot higher now that I was using a graphics API but it was all worth it once the ray tracing renderer was up and running and I could now make changes in near realtime. This revelation opened up a world of possibilities for me, facilitated by the next books in the Ray Tracing in One Weekend series and by Sebastian Lague's [Coding Adventures](): "What if I want to render triangles too?" - ([Möller–Trumbore](https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm)); "oh and what about if I want an object to emit light instead of getting all the light from the background?" - emissive materials; "I've heard about this [Bounding Volume Hierarchy (BVH)](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy) thing, how would I do that?" - [Coding Adventure](), and "I have an idea, I wonder what it would look like if I could click on object and it would highlight them" - this one was a little more work as I needed to learn how to interact with the windowing API and input system but I'm happy with the result. Figuring out how to interact with the windowing API also opened up the possibilities for camera controls, which made the renderer so much more fun to play with.
 
-<IntegratedCanvas id="gpu-port-modified" colour="aquamarine" />
+<IntegratedCanvas id="gpu-port-modified" colour="aquamarine" cover="true" />
 <Caption>A renderer with a movable Camera, a BVH, emissive materials, triangles, spheres, and adjustable depth of field</Caption>
 
 Even though with the number of objects and scenes that I was creating performance wasn't an issue, I was finding the optimisations fascinating. This is why I implemented BVH before it was strictly required. The problem was that there was one optimisation I had in mind that none of the documentation I was going through was answering. Ray Tracing has become quite the buzzword recently, especially in the context of graphics cards and hardware, and I am lucky enough to have a GPU with hardware Ray Tracing acceleration. How can I use this in my renderer?

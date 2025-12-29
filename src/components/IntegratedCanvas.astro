@@ -1,10 +1,12 @@
 ---
-const { id, colour } = Astro.props;
+const { id, colour, cover } = Astro.props;
+
+const cover_id = id + "-cover"
 ---
 
 <p style="position: relative;">
 	<canvas id={id} style=`background-color: ${colour};`> </canvas>
-	<canvas id=`${id}-cover` style=`background-color: black;position: absolute;top: 0;left: 0;`> </canvas>
+	{cover==="true" && <canvas id={cover_id} style="background-color: black;position: absolute;top: 0;left: 0;"> </canvas>}
 </p>
 
 <style>
