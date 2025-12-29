@@ -12,8 +12,14 @@ window.onload = () => {
 	}
 	wgpu();
 	init().then(() => {
-		// console.log("WASM Loaded");
-		run("gpu-port-modified");
+		const canvas_id = "gpu-port-modified";
+		const cover_element = document.getElementById(canvas_id + "-cover")!;
+
+		cover_element.addEventListener("click", () => {
+			cover_element.hidden = true;
+		});
+
+		run(canvas_id);
 	});
 };
 
@@ -30,6 +36,7 @@ class Buffer {
 }
 
 class Triangle {
+	cover: HTMLElement | null;
 	element: HTMLElement;
 	context: GPUCanvasContext;
 	device: GPUDevice;
@@ -45,12 +52,17 @@ class Triangle {
 
 	constructor(
 		element: HTMLElement,
+		cover: HTMLElement | null,
 		context: GPUCanvasContext,
 		device: GPUDevice,
 		pipeline: GPURenderPipeline,
 		vertexBuffer: GPUBuffer,
 		vertices: Float32Array
 	) {
+		if (cover != null) {
+			cover.hidden = false;
+		}
+		this.cover = cover;
 		this.element = element;
 		this.context = context;
 		this.device = device;
@@ -64,9 +76,16 @@ class Triangle {
 		this.frameCount = 0;
 		this.is_visible = false;
 	}
+	isCovered(): boolean {
+		// If no cover, not covered
+		if (this.cover === null) return false;
+		// If cover hidden, not covered
+		else return !this.cover.hidden;
+	}
 }
 
 class Demo {
+	cover: HTMLElement | null;
 	element: HTMLElement;
 	context: GPUCanvasContext;
 	device: GPUDevice;
@@ -87,6 +106,7 @@ class Demo {
 
 	constructor(
 		element: HTMLElement,
+		cover: HTMLElement | null,
 		context: GPUCanvasContext,
 		device: GPUDevice,
 		pipeline: GPURenderPipeline,
@@ -97,6 +117,10 @@ class Demo {
 		storageBuffers: Buffer[],
 		camera: Camera
 	) {
+		if (cover != null) {
+			cover.hidden = false;
+		}
+		this.cover = cover;
 		this.element = element;
 		this.context = context;
 		this.device = device;
@@ -115,6 +139,12 @@ class Demo {
 		this.frameCount = 0;
 		this.is_visible = false;
 	}
+	isCovered(): boolean {
+		// If no cover, not covered
+		if (this.cover === null) return false;
+		// If cover hidden, not covered
+		else return !this.cover.hidden;
+	}
 }
 
 let triangle: Triangle | null = null;
@@ -129,9 +159,6 @@ const gpu_port_canvas_name = "gpu-port";
 
 function isElementInViewport(el: HTMLElement): boolean {
 	const rect = el.getBoundingClientRect();
-	// console.log(rect);
-	// console.log([rect.top, rect.bottom, window.innerHeight]);
-	// console.log([window.innerHeight, document.documentElement.clientHeight, window.innerHeight || document.documentElement.clientHeight]);
 	// Return true if any of the element is visible
 	return (
 		(rect.top >= 0 || rect.bottom >= 0) &&
@@ -143,12 +170,12 @@ function isElementInViewport(el: HTMLElement): boolean {
 
 function visibilityHandler(_e: Event) {
 	// We want to keep track if the canvas is visible in the viewport so we don't waste compute
-	if (triangle !== null && isElementInViewport(triangle.element)) {
+	if (triangle !== null && isElementInViewport(triangle.element) && !triangle.isCovered()) {
 		triangle.is_visible = true;
 	} else if (triangle !== null) {
 		triangle.is_visible = false;
 	}
-	if (ray !== null && isElementInViewport(ray.element)) {
+	if (ray !== null && isElementInViewport(ray.element) && !ray.isCovered()) {
 		ray.is_visible = true;
 	} else if (ray !== null) {
 		ray.is_visible = false;
@@ -176,6 +203,7 @@ async function wgpu() {
 }
 
 function initTriangle(canvas_id: string, device: GPUDevice) {
+	const cover_element = document.getElementById(canvas_id + "-cover");
 	const canvas_element = document.getElementById(canvas_id)!;
 	let canvas = canvas_element as HTMLCanvasElement;
 	canvas.width = canvas.clientWidth * window.devicePixelRatio;
@@ -258,7 +286,7 @@ function initTriangle(canvas_id: string, device: GPUDevice) {
 		},
 	});
 
-	triangle = new Triangle(canvas_element, context, device, pipeline, vertexBuffer, vertices);
+	triangle = new Triangle(canvas_element, cover_element, context, device, pipeline, vertexBuffer, vertices);
 
 	canvas.addEventListener("mousemove", (e) => {
 		if (triangle === null) {
@@ -269,6 +297,18 @@ function initTriangle(canvas_id: string, device: GPUDevice) {
 		triangle.mouseX = (e.clientX - rect.left) / rect.width; // scale mouse coordinates after they have
 		triangle.mouseY = (e.clientY - rect.top) / rect.height; // been adjusted to be relative to element
 	});
+
+	canvas.addEventListener("click", (e) => {
+		if (cover_element != null) cover_element.hidden = false;
+		visibilityHandler(e);
+	});
+
+	if (cover_element != null) {
+		cover_element.addEventListener("click", (e) => {
+			cover_element.hidden = true;
+			visibilityHandler(e);
+		});
+	}
 
 	// TODO: Test listener for touch events
 	canvas.addEventListener("touchmove", (e) => {
@@ -290,6 +330,7 @@ function initTriangle(canvas_id: string, device: GPUDevice) {
 }
 
 function initRay(canvas_id: string, device: GPUDevice) {
+	const cover_element = document.getElementById(canvas_id + "-cover");
 	const canvas_element = document.getElementById(canvas_id)!;
 	let canvas = canvas_element as HTMLCanvasElement;
 	canvas.width = canvas.clientWidth * window.devicePixelRatio;
@@ -440,7 +481,19 @@ function initRay(canvas_id: string, device: GPUDevice) {
 
 	const storageArrays = [new Buffer(sceneArray, sceneBuffer)];
 
-	ray = new Demo(canvas_element, context, device, pipeline, vertexBuffer, vertices, bindGroup, uniformBuffers, storageArrays, camera);
+	ray = new Demo(
+		canvas_element,
+		cover_element,
+		context,
+		device,
+		pipeline,
+		vertexBuffer,
+		vertices,
+		bindGroup,
+		uniformBuffers,
+		storageArrays,
+		camera
+	);
 
 	canvas.addEventListener("mousemove", (e) => {
 		if (ray === null) {
@@ -451,6 +504,18 @@ function initRay(canvas_id: string, device: GPUDevice) {
 		ray.mouseX = (e.clientX - rect.left) / rect.width; // scale mouse coordinates after they have
 		ray.mouseY = (e.clientY - rect.top) / rect.height; // been adjusted to be relative to element
 	});
+
+	canvas.addEventListener("click", (e) => {
+		if (ray !== null && ray.cover !== null) ray.cover.hidden = false;
+		visibilityHandler(e);
+	});
+
+	if (ray?.cover !== null) {
+		ray.cover.addEventListener("click", (e) => {
+			if (ray !== null && ray.cover !== null) ray.cover.hidden = true;
+			visibilityHandler(e);
+		});
+	}
 
 	// Check if the canvas is immediately visible
 	let dummy_event = new Event("");

@@ -2,8 +2,9 @@
 const { id, colour } = Astro.props;
 ---
 
-<p>
+<p style="position: relative;">
 	<canvas id={id} style=`background-color: ${colour};`> </canvas>
+	<canvas id=`${id}-cover` style=`background-color: black;position: absolute;top: 0;left: 0;`> </canvas>
 </p>
 
 <style>
@@ -13,7 +14,10 @@ const { id, colour } = Astro.props;
 		aspect-ratio: 16/9;
 		background-color: salmon;
 
-		// Consider modifying this line if touch inputs don't work
+		/* Consider modifying this line if touch inputs don't work */
 		touch-action: none;
+	}
+	#${id}-cover{
+
 	}
 </style>
