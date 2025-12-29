@@ -125,6 +125,11 @@ struct State<'a> {
     ctrl_pressed: bool,
 
     #[cfg(target_arch = "wasm32")]
+    canvas: web_sys::HtmlCanvasElement,
+    #[cfg(target_arch = "wasm32")]
+    cover_canvas: Option<web_sys::HtmlCanvasElement>,
+
+    #[cfg(target_arch = "wasm32")]
     last_frame_time: Date,
     #[cfg(target_arch = "wasm32")]
     frame_rate_history: [f32; FPS_HISTORY_LENGTH],
@@ -138,7 +143,12 @@ struct State<'a> {
 }
 
 impl<'a> State<'a> {
-    async fn new(window: &'a Window, limits: Limits) -> State<'a> {
+    async fn new(
+        window: &'a Window,
+        limits: Limits,
+        #[cfg(target_arch = "wasm32")] canvas: web_sys::HtmlCanvasElement,
+        #[cfg(target_arch = "wasm32")] cover_canvas: Option<web_sys::HtmlCanvasElement>,
+    ) -> State<'a> {
         let size = window.inner_size();
 
         // The instance is a handle to our GPU
@@ -509,6 +519,11 @@ impl<'a> State<'a> {
             touch_finger_id: None,
 
             #[cfg(target_arch = "wasm32")]
+            canvas,
+            #[cfg(target_arch = "wasm32")]
+            cover_canvas,
+
+            #[cfg(target_arch = "wasm32")]
             last_frame_time: Date::new_0(),
             #[cfg(target_arch = "wasm32")]
             frame_rate_history: [60.; FPS_HISTORY_LENGTH],
@@ -539,6 +554,22 @@ impl<'a> State<'a> {
             self.uniforms.update(new_size.width, new_size.height);
             self.uniforms.reset_samples();
         }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn is_visible(&self) -> bool {
+        // If the cover is currently on
+        if self.cover_canvas.as_ref().is_some_and(|c| !c.hidden()) {
+            return false;
+        }
+        // If the canvas is currently in the viewport
+        let rect = self.canvas.get_bounding_client_rect();
+        return (rect.top() >= 0.0 || rect.bottom() >= 0.0)
+            && (rect.left() >= 0.0 || rect.right() >= 0.0)
+            && (rect.top() <= self.window.inner_size().height as f64
+                || rect.bottom() <= self.window.inner_size().height as f64)
+            && (rect.right() <= self.window.inner_size().width as f64
+                || rect.left() <= self.window.inner_size().width as f64);
     }
 
     fn input(&mut self, event: &WindowEvent) -> bool {
@@ -634,48 +665,57 @@ impl<'a> State<'a> {
                         let pos = &self.mouse_position;
                         // Allow for the mouse to move a little bit between being pressed and released
                         if (pos.x - last_pos.x).abs() < 5. && (pos.y - last_pos.y).abs() < 5. {
-                            // Check if there are any object we can select
-                            // TODO: Select other primitives
-                            let (hit_object, dist_to_object) = get_selected_object(
-                                &self.mouse_position,
-                                &self.uniforms,
-                                self.scene.get_sphere_arr(),
-                            );
-
-                            if hit_object == usize::MAX {
-                                clear_all_selections(self.scene.get_sphere_arr_mut());
-                                if *button == 0 {
-                                    self.camera.uniforms.dof_scale = 0.;
+                            if *button == 0 {
+                                if let Some(canvas) = &mut self.cover_canvas {
+                                    canvas.set_hidden(!canvas.hidden());
                                 }
                             } else {
-                                match *button {
-                                    0 => {
-                                        if self.ctrl_pressed {
-                                            add_selection(
-                                                hit_object,
-                                                self.scene.get_sphere_arr_mut(),
-                                            );
-                                        } else {
-                                            self.camera.uniforms.focal_distance = dist_to_object;
-                                            self.camera.uniforms.dof_scale = DOF_SCALE;
-                                        }
+                                // Check if there are any object we can select
+                                // TODO: Select other primitives
+                                let (hit_object, dist_to_object) = get_selected_object(
+                                    &self.mouse_position,
+                                    &self.uniforms,
+                                    self.scene.get_sphere_arr(),
+                                );
+
+                                if hit_object == usize::MAX {
+                                    clear_all_selections(self.scene.get_sphere_arr_mut());
+                                    if *button == 0 {
+                                        self.camera.uniforms.dof_scale = 0.;
                                     }
-                                    1 => {
-                                        if self.ctrl_pressed {
-                                            remove_selection(
-                                                hit_object,
-                                                self.scene.get_sphere_arr_mut(),
-                                            );
+                                } else {
+                                    match *button {
+                                        0 => {
+                                            if self.ctrl_pressed {
+                                                add_selection(
+                                                    hit_object,
+                                                    self.scene.get_sphere_arr_mut(),
+                                                );
+                                            } else {
+                                                self.camera.uniforms.focal_distance =
+                                                    dist_to_object;
+                                                self.camera.uniforms.dof_scale = DOF_SCALE;
+                                            }
                                         }
-                                    }
-                                    _ => {
-                                        if self.ctrl_pressed {
-                                            clear_all_selections(self.scene.get_sphere_arr_mut());
+                                        1 => {
+                                            if self.ctrl_pressed {
+                                                remove_selection(
+                                                    hit_object,
+                                                    self.scene.get_sphere_arr_mut(),
+                                                );
+                                            }
+                                        }
+                                        _ => {
+                                            if self.ctrl_pressed {
+                                                clear_all_selections(
+                                                    self.scene.get_sphere_arr_mut(),
+                                                );
+                                            }
                                         }
                                     }
                                 }
+                                self.uniforms.reset_samples();
                             }
-                            self.uniforms.reset_samples();
                         }
                     }
                 }
@@ -706,6 +746,9 @@ impl<'a> State<'a> {
         }
         #[cfg(target_arch = "wasm32")]
         {
+            if !self.is_visible() {
+                return Ok(());
+            }
             // Calculate FPS
             let current_date = Date::new_0();
             let elapsed = current_date.get_milliseconds() - self.last_frame_time.get_milliseconds();
@@ -826,24 +869,39 @@ pub async fn run(canvas_id: &str) {
     // we're building for that (or other old APIs) we'll have to disable some.
     let limits = wgpu::Limits::default();
 
+    let canvas: web_sys::HtmlCanvasElement;
+    let mut cover_canvas: Option<web_sys::HtmlCanvasElement> = None;
+
     #[cfg(target_arch = "wasm32")]
     {
         use winit::platform::web::WindowAttributesExtWebSys;
         let document = web_sys::window().unwrap().document().unwrap();
-        let canvas = document.get_element_by_id(canvas_id).unwrap();
-        let canvas: web_sys::HtmlCanvasElement = canvas
+        let canvas_element = document.get_element_by_id(canvas_id).unwrap();
+        canvas = canvas_element
             .dyn_into::<web_sys::HtmlCanvasElement>()
             .map_err(|_| ())
             .unwrap();
 
-        window_attributes = window_attributes.with_canvas(Some(canvas));
+        window_attributes = window_attributes.with_canvas(Some(canvas.clone()));
         window_attributes = window_attributes.with_active(false); // Don't jump directly to the canvas
+
+        let cover_canvas_element = document.get_element_by_id(&(canvas_id.to_string() + "-cover"));
+        if let Some(cover_canvas_element) = cover_canvas_element {
+            cover_canvas = Some(
+                cover_canvas_element
+                    .dyn_into::<web_sys::HtmlCanvasElement>()
+                    .map_err(|_| ())
+                    .unwrap(),
+            );
+        } else {
+            log::warn!("Failed to find cover canvas");
+        }
     }
 
     let window = event_loop.create_window(window_attributes).unwrap();
 
     // State::new uses async code, so we're going to wait for it to finish
-    let mut state = State::new(&window, limits).await;
+    let mut state = State::new(&window, limits, canvas, cover_canvas).await;
     let mut surface_configured = false;
 
     // TODO: replace run with run_app

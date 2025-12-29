@@ -1,16 +1,6 @@
 {
 	"discord.enabled": false,
 	"rust-analyzer.cargo.target": "wasm32-unknown-unknown",
-	"rust-analyzer.linkedProjects": [
-		"./src/scripts/bloom/intro/Cargo.toml",
-		"./src/scripts/bloom/ray/Cargo.toml",
-	],
-	"cSpell.words": [
-		"AABB",
-		"BLAS",
-		"icosphere",
-		"Khronos",
-		"TLAS",
-		"Vulkano"
-	]
+	"rust-analyzer.linkedProjects": ["./src/scripts/bloom/ray/Cargo.toml"],
+	"cSpell.words": ["AABB", "BLAS", "icosphere", "Khronos", "TLAS", "Vulkano"]
 }
