@@ -54,7 +54,6 @@ pub const MAX_QUAD_COUNT: usize = 100;
 pub const MAX_TRIANGLE_COUNT: usize = 100;
 pub const MAX_OBJECT_COUNT: usize = MAX_SPHERE_COUNT + MAX_QUAD_COUNT + MAX_TRIANGLE_COUNT;
 pub const MAX_PASSES: u32 = 100; // Number of frames before we accept the result
-pub const MAX_FPS: u32 = 10; // Number of frames before we accept the result
 
 // We need this for Rust to store our data correctly for the shaders
 #[repr(C)]
@@ -751,12 +750,7 @@ impl<'a> State<'a> {
             }
             // Calculate FPS
             let current_date = Date::new_0();
-            let elapsed = current_date.get_milliseconds() - self.last_frame_time.get_milliseconds();
-
-            // Limit fps so that low performance systems don't tank when rendering the page
-            if elapsed < 1000 / MAX_FPS {
-                return Ok(());
-            }
+            // let elapsed = current_date.get_milliseconds() - self.last_frame_time.get_milliseconds();
 
             self.last_frame_time = current_date;
             self.frame_rate_pos += 1;

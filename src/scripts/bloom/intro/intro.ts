@@ -150,8 +150,6 @@ class Demo {
 let triangle: Triangle | null = null;
 let ray: Demo | null = null;
 
-let lastTimestamp = 0;
-
 const triangle_canvas_name = "triangle";
 const gpu_port_canvas_name = "gpu-port";
 
@@ -522,18 +520,15 @@ function initRay(canvas_id: string, device: GPUDevice) {
 	visibilityHandler(dummy_event);
 }
 
-function render(timestamp: number) {
-	const frameTime_ms = timestamp - lastTimestamp;
-
+function render(_timestamp: number) {
 	// Triangle
 	if (triangle !== null && triangle.is_visible) {
 		renderTriangle(triangle);
 	}
-	// Limit
-	if (frameTime_ms > 100 && ray !== null && ray.is_visible) {
+	// Only render when visible
+	if (ray !== null && ray.is_visible) {
 		ray.camera.orbit(-0.01, 0.0);
 		renderRay(ray);
-		lastTimestamp = timestamp;
 	}
 
 	requestAnimationFrame(render);
