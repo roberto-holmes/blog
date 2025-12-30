@@ -188,7 +188,7 @@ addEventListener("resize", visibilityHandler);
 // -------------------------------------- WebGPU --------------------------------------
 
 async function wgpu() {
-	const adapter = await navigator.gpu.requestAdapter();
+	const adapter = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
 	if (!adapter) {
 		throw new Error("No appropriate GPUAdapter found.");
 	}
