@@ -126,7 +126,7 @@ struct State<'a> {
     #[cfg(target_arch = "wasm32")]
     canvas: web_sys::HtmlCanvasElement,
     #[cfg(target_arch = "wasm32")]
-    cover_canvas: Option<web_sys::HtmlCanvasElement>,
+    cover_canvas: Option<web_sys::HtmlElement>,
 
     #[cfg(target_arch = "wasm32")]
     last_frame_time: Date,
@@ -146,7 +146,7 @@ impl<'a> State<'a> {
         window: &'a Window,
         limits: Limits,
         #[cfg(target_arch = "wasm32")] canvas: web_sys::HtmlCanvasElement,
-        #[cfg(target_arch = "wasm32")] cover_canvas: Option<web_sys::HtmlCanvasElement>,
+        #[cfg(target_arch = "wasm32")] cover_canvas: Option<web_sys::HtmlElement>,
     ) -> State<'a> {
         let size = window.inner_size();
 
@@ -864,7 +864,7 @@ pub async fn run(canvas_id: &str) {
     let limits = wgpu::Limits::default();
 
     let canvas: web_sys::HtmlCanvasElement;
-    let mut cover_canvas: Option<web_sys::HtmlCanvasElement> = None;
+    let mut cover_canvas: Option<web_sys::HtmlElement> = None;
 
     #[cfg(target_arch = "wasm32")]
     {
@@ -883,7 +883,7 @@ pub async fn run(canvas_id: &str) {
         if let Some(cover_canvas_element) = cover_canvas_element {
             cover_canvas = Some(
                 cover_canvas_element
-                    .dyn_into::<web_sys::HtmlCanvasElement>()
+                    .dyn_into::<web_sys::HtmlElement>()
                     .map_err(|_| ())
                     .unwrap(),
             );
