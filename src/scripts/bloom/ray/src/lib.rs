@@ -664,7 +664,7 @@ impl<'a> State<'a> {
                         let pos = &self.mouse_position;
                         // Allow for the mouse to move a little bit between being pressed and released
                         if (pos.x - last_pos.x).abs() < 5. && (pos.y - last_pos.y).abs() < 5. {
-                            if *button == 0 {
+                            if *button == 0 && !self.ctrl_pressed {
                                 if let Some(canvas) = &mut self.cover_canvas {
                                     canvas.set_hidden(!canvas.hidden());
                                 }
@@ -684,7 +684,7 @@ impl<'a> State<'a> {
                                     }
                                 } else {
                                     match *button {
-                                        0 => {
+                                        1 => {
                                             if self.ctrl_pressed {
                                                 add_selection(
                                                     hit_object,
@@ -696,7 +696,7 @@ impl<'a> State<'a> {
                                                 self.camera.uniforms.dof_scale = DOF_SCALE;
                                             }
                                         }
-                                        1 => {
+                                        2 => {
                                             if self.ctrl_pressed {
                                                 remove_selection(
                                                     hit_object,
