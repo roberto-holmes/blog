@@ -44,8 +44,8 @@ class Triangle {
 	vertexBuffer: GPUBuffer;
 	vertices: Float32Array;
 
-	mouseX: number;
-	mouseY: number;
+	mouse: { x: number; y: number };
+	lastMouse: { x: number; y: number };
 
 	frameCount: number;
 	is_visible: boolean;
@@ -70,8 +70,8 @@ class Triangle {
 		this.vertexBuffer = vertexBuffer;
 		this.vertices = vertices;
 
-		this.mouseX = 0.0;
-		this.mouseY = 0.0;
+		this.mouse = { x: 0, y: 0 };
+		this.lastMouse = { x: 1.0, y: 1.0 }; // This needs to be different so that the first frame draws
 
 		this.frameCount = 0;
 		this.is_visible = false;
@@ -292,8 +292,8 @@ function initTriangle(canvas_id: string, device: GPUDevice) {
 		}
 		let rect = canvas.getBoundingClientRect(); // abs. size of element
 
-		triangle.mouseX = (e.clientX - rect.left) / rect.width; // scale mouse coordinates after they have
-		triangle.mouseY = (e.clientY - rect.top) / rect.height; // been adjusted to be relative to element
+		triangle.mouse.x = (e.clientX - rect.left) / rect.width; // scale mouse coordinates after they have
+		triangle.mouse.y = (e.clientY - rect.top) / rect.height; // been adjusted to be relative to element
 	});
 
 	canvas.addEventListener("click", (e) => {
@@ -318,8 +318,8 @@ function initTriangle(canvas_id: string, device: GPUDevice) {
 		}
 		let rect = canvas.getBoundingClientRect(); // abs. size of element
 
-		triangle.mouseX = (e.touches[0].clientX - rect.left) / rect.width; // scale mouse coordinates after they have
-		triangle.mouseY = (e.touches[0].clientY - rect.top) / rect.height; // been adjusted to be relative to element
+		triangle.mouse.x = (e.touches[0].clientX - rect.left) / rect.width; // scale mouse coordinates after they have
+		triangle.mouse.y = (e.touches[0].clientY - rect.top) / rect.height; // been adjusted to be relative to element
 	});
 
 	// Check if the canvas is immediately visible
@@ -535,6 +535,12 @@ function render(_timestamp: number) {
 }
 
 function renderTriangle(triangle: Triangle) {
+	// We want to avoid redraws if the mouse hasn't moved and thus the colours haven't changed
+	if (JSON.stringify(triangle.mouse) === JSON.stringify(triangle.lastMouse)) {
+		return;
+	}
+	triangle.lastMouse.x = triangle.mouse.x;
+	triangle.lastMouse.y = triangle.mouse.y;
 	const encoder = triangle.device.createCommandEncoder();
 
 	const pass = encoder.beginRenderPass({
@@ -542,7 +548,7 @@ function renderTriangle(triangle: Triangle) {
 			{
 				view: triangle.context.getCurrentTexture().createView(),
 				loadOp: "clear",
-				clearValue: { r: 0.0, g: triangle.mouseX, b: triangle.mouseY, a: 1.0 },
+				clearValue: { r: 0.0, g: triangle.mouse.x, b: triangle.mouse.y, a: 1.0 },
 				storeOp: "store",
 			} as GPURenderPassColorAttachment,
 		],
