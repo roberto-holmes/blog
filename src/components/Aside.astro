@@ -20,8 +20,7 @@ const { title } = Astro.props;
 		background-color: lavender;
 		border-radius: 10px;
 		padding: 10px;
-		margin: auto 1em;
-		margin-bottom: 2em;
+		margin: auto 1em 2em;
 
 		h3 {
 			padding: 10px;
@@ -30,6 +29,12 @@ const { title } = Astro.props;
 
 		p {
 			margin: 0;
+		}
+	}
+
+	@media only screen and (max-width: 1080px) {
+		aside {
+			margin: auto 0em 2em;
 		}
 	}
 </style>
