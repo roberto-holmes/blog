@@ -1,17 +1,17 @@
 ---
-// const { text } = Astro.props;
+const { Padding = "-2em" } = Astro.props;
 ---
 
 <div class="caption-container">
 	<p class="caption"><slot /></p>
 </div>
 
-<style>
+<style define:vars={{ extraPadding: Padding }}>
 	.caption-container {
 		width: 100%;
 		display: flex;
 		justify-content: center;
-		margin-top: -2em;
+		margin-top: var(--extraPadding);
 	}
 	.caption {
 		font-style: italic;

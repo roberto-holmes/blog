@@ -11,6 +11,9 @@ draft: false
 import IntegratedCanvas from "../../components/IntegratedCanvas.astro";
 import Caption from "../../components/Caption.astro";
 import Aside from "../../components/Aside.astro";
+import Diagram1 from "../../assets/bloom/PipelineStages1.svg";
+import Diagram2 from "../../assets/bloom/PipelineStages2.svg";
+import DiagramRay from "../../assets/bloom/PipelineRayTracing.svg";
 
 # Ray Tracing in One Weekend
 
@@ -91,9 +94,11 @@ At the time of writing this, ray tracing in Vulkan is performed using **KHR** ex
 
 ## The Graphics Pipeline for Ray Tracing
 
-To get a bit technical, my software ray tracing solution was originally performed in the fragmentation stage of the graphics pipeline with the vertex stage being used to generate a single big rectangle tha covers the screen. At its most basic, these two stages are all that is needed to have yourself an image to display. Every time a frame is requested, you set the GPU to compute the vertex shader (that computes the screen space coordinates for all the objects in the scene), then the fragment shader (that colours in the objects processed by the vertex shader), then display the output image. This is a simple solution because the graphics card only has to be doing one block of computation at the time, either generating the viewport or performing the ray tracing.
+To get a bit technical, my software ray tracing solution was originally performed in the fragmentation stage of the graphics pipeline with the vertex stage being used to generate a single big rectangle that covers the screen. At its most basic, these two stages are all that is needed to have yourself an image to display. Every time a frame is requested, you set the GPU to compute the vertex shader (this computes the screen space coordinates for all the objects in the scene), then the fragment shader (colouring in the objects processed by the vertex shader), then display the output image. This is a simple solution because the graphics card only has to be doing one block of computation at the time, either generating the viewport or performing the ray tracing. If you want more information on the different pipeline stages, the Vulkan documentation has [a more detailed explanation and diagram](https://docs.vulkan.org/spec/latest/chapters/pipelines.html).
 
-## TODO: Insert a diagram of stages
+<Diagram1 width={"100%"} height={"100%"} />
+
+<Caption Padding="0">(Heavily) Simplified diagram of stages in the graphics pipeline</Caption>
 
 The problem with this is that the hardware ray tracing can't be performed in either of these stages. The ray tracing stage is a distinct process that needs to be set up and run separately. In my case, the purpose of this stage is to take the acceleration structure and produce an image with the camera's view of the scene. This image can then be used by the fragmentation shader to be displayed on the vertices provided by the vertex shader (i.e. shown on the display). Now, although the ray tracing shader can be essentially inserted into the standard vertex + fragmentation shader pipeline, there's a new topic we need to discuss.
 
@@ -110,9 +115,9 @@ Compute shaders are very versatile tools that can be used to run whatever you wa
 
 With two (or more) queues, we can dispatch work to the GPU asynchronously. This is a massive advantage when wanting to avoid doing specific work every frame, wanting to do work multiple times a frame, or just not wanting to be bound to the frame rate. The problem is that this adds an extra layer of complexity with making sure all resources that are being shared between queues are in the correct state for whenever they are being used. This can get even worse if the CPU code that's dispatching these queues is also multithreaded and sharing GPU access across threads or waiting on the GPU to finish jobs.
 
-I decided that I wanted my ray tracing to happen in a separate queue. This would mean that if the ray tracing was faster than the frame time, multiple ray tracing passes could happen per frame (and hopefully denoise the scene a little bit), and if the ray tracing was slower than frame time, we could avoid screen tearing and potentially do some fancy post processing to hide the slow frame rates (like nvidia reflex or the 3kliksphilip video \[TODO reference\]). And so, before implementing hardware ray tracing, I ported the software solution to a compute shader.
+<Diagram2 width={"100%"} height={"100%"} />
 
-## TODO: Updated graphic of queues
+<Caption Padding="0">Two separate and asynchronous queues running their own pipeline stages</Caption>
 
 With this architectural change in place, I could finally get round to implementing hardware ray tracing. Hardware ray tracing is centered around the construction and maintaining of an Acceleration Structure and the first task was trying to fit my primitives into the Vulkan Acceleration Structure.
 
@@ -126,7 +131,9 @@ One interesting thing about the two tiers of Acceleration Structures is that bot
 
 With the Acceleration Structures sorted, the next step was to actually write the GPU code for the ray tracing. Generally, ray tracing is split into four stages which each ray passes through: _ray generation_, _intersection_ (if the hardware decides there are objects in the way), and then either _hit_ or _miss_. In my software solution, I was doing all of these in a single shader and computing the transitions myself. However, when using hardware ray tracing, the black box that is the hardware acceleration does the transitions between each stage. This means you provide a shader/bit of code for each stage and pass it onto the GPU so that it can call it whenever it feels inclined to.
 
-## TODO: Diagram of ray tracing stages from vulkan documentation
+<DiagramRay width={"100%"} height={"100%"} />
+
+<Caption Padding="0">Basic hardware ray tracing pipeline</Caption>
 
 Let's have a quick recap of the ray tracing stages and how we're using them:
 
