@@ -2,6 +2,8 @@
 const { id, colour, cover } = Astro.props;
 
 const cover_id = id + "-cover";
+
+const current_lang = Astro.url.pathname.includes("/es") ? "es" : "en";
 ---
 
 <div style="position:relative;margin-bottom:2em;">
@@ -19,9 +21,11 @@ const cover_id = id + "-cover";
 					justify-content:center;
   					align-items:center;"
 				>
-					<h3 style="color:aliceblue;">Click to show</h3>
+					<h3 style="color:aliceblue;">{current_lang === "en" ? "Click to show" : "Pulse para mostrar"}</h3>
 					<p style="color:aliceblue;width:80%;text-align: center;">
-						Depending on your system, this may have a noticeable performance impact so feel free to click again to disable
+						{current_lang === "en"
+							? "Depending on your system, this may have a noticeable performance impact so feel free to click again to disable"
+							: "Si notas problemas de rendimiento pulsa otra vez para desactivar"}
 					</p>
 				</div>
 			</div>
