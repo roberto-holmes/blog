@@ -3,12 +3,12 @@
 // 	date: Date;
 // }
 
-const { date, locale } = Astro.props;
+const { date } = Astro.props;
 ---
 
 <time datetime={date.toISOString()}>
 	{
-		date.toLocaleDateString(locale, {
+		date.toLocaleDateString(Astro.url.pathname.includes("/es/") ? "es" : "en-gb", {
 			year: "numeric",
 			month: "short",
 			day: "numeric",
