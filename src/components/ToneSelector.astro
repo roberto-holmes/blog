@@ -1,0 +1,117 @@
+---
+// const { id, colour, cover } = Astro.props;
+
+const current_lang = Astro.url.pathname.includes("/es") ? "es" : "en";
+---
+
+<div style="display: flex; justify-content: center;">
+    <div class="main-container">
+        <div class="button" id="start-game">{current_lang === "en" ? "Start" : "Iniciar"}</div>
+        <div class="title game-elements">
+            {current_lang === "en" ? "Select the most consonant sound" : "Selecciona el sonido con mas disonancia"}
+        </div>
+
+        <div class="game-elements" style="display: flex; justify-content: space-around; padding-bottom: 0.5em;">
+            <div id="repeat" style=" margin: auto 0;" class="button game-elements">{current_lang === "en" ? "Repeat" : ""}</div>
+            <div style="display:flex; flex-direction: column; justify-content: center;">
+                <label for="volume" style="text-align: center;">{current_lang === "en" ? "Volume" : "Volumen"}</label>
+                <input type="range" id="volume" name="volume" min="0" max="1" step="any" />
+            </div>
+            <div id="counter" class="game-elements" style="margin: auto 0;">0/46</div>
+        </div>
+
+        <div class="selector game-elements">
+            <div id="selector-A" class="item game-elements" style="border-bottom-left-radius: 1rem;">
+                <div>A</div>
+                <div class="key-hint">1</div>
+            </div>
+            <div id="selector-B" class="item game-elements" style="border-left: 1px solid;border-right: 1px solid;">
+                <div>B</div>
+                <div class="key-hint">2</div>
+            </div>
+            <div id="selector-same" class="item game-elements" style="border-bottom-right-radius: 1rem;">
+                <div>same</div>
+                <div class="key-hint">3</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .game-elements {
+        visibility: hidden;
+        display: none !important;
+    }
+    .main-container {
+        width: 50%;
+        height: 20rem;
+        aspect-ratio: 16/9;
+        background-color: lavender;
+        border-radius: 1rem;
+        border-bottom: black;
+        border: 10px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+
+    .title {
+        font-size: larger;
+        font-weight: bold;
+        text-align: center;
+        height: 25%;
+    }
+
+    #start-game {
+        margin: 0 auto;
+    }
+
+    .button {
+        border: 1px solid;
+        border-radius: 10px;
+        padding: 0 1em;
+        background-color: white;
+        cursor: pointer;
+    }
+
+    #counter {
+        text-align: center;
+        height: 25%;
+    }
+
+    .selector {
+        height: 100%;
+
+        display: inline-flex;
+    }
+
+    .item {
+        border-color: black;
+        padding: 10px;
+        border-top: 1px solid;
+        width: 100%;
+        text-align: center;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+    .item:hover {
+        background-color: blueviolet;
+        color: white;
+    }
+    .playing {
+        background-color: palegreen;
+    }
+    .selected {
+        background-color: lightslategrey !important;
+    }
+    .key-hint {
+        border: 1px solid;
+        margin: 0 auto;
+        aspect-ratio: 1;
+        font-family: monospace;
+        font-size: small;
+    }
+</style>
