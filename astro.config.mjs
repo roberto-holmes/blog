@@ -41,7 +41,7 @@ export default defineConfig({
             },
             ws: {
                 protocol: "wss",
-                host: "tycho.local",
+                host: "tycho.internal",
                 port: 4321,
             },
         },
