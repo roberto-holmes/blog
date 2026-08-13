@@ -1,33 +1,11 @@
 import { initMidiDropdown } from "./midi.js";
 import { initGame } from "./dissonance-game.js";
-import { quicksort, stacklessSort } from "./sort.js";
 
 initMidiDropdown(document.getElementById("midi-selector") as HTMLSelectElement);
 
 (document.getElementById("start-game") as HTMLElement).addEventListener("click", (_) => {
     initGame();
 });
-
-function sort() {
-    // let array = [8, 10, 4, 1, 8, 7, 7, 9, 4, 1];
-
-    let array = [];
-    const x = 52;
-    // Create an array
-    for (let i = 0; i < x; i++) {
-        array.push(Math.ceil(Math.random() * 13));
-    }
-    console.log(array);
-
-    let sorted: number[][] = [];
-    quicksort(array, sorted, 0, array.length, Math.ceil(array.length / 2));
-    console.log(sorted);
-
-    const stackless = stacklessSort(array);
-    console.log(stackless);
-}
-
-sort();
 
 let audioContext: AudioContext | null = null;
 

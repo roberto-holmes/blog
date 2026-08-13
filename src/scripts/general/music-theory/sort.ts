@@ -81,7 +81,7 @@ class Bin {
     }
 }
 
-export function stacklessSort(array: number[]): Bin[] {
+export function stacklessSort(array: number[]): number[][] {
     let sorted = [new Bin(array)];
 
     let currentBin = 0;
@@ -156,5 +156,9 @@ export function stacklessSort(array: number[]): Bin[] {
         console.error("Failed to sort correctly");
     }
 
-    return sorted;
+    let ret = [];
+    for (const b of sorted) {
+        ret.push(b.values);
+    }
+    return ret;
 }
