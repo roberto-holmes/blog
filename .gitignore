@@ -26,3 +26,8 @@ pnpm-debug.log*
 
 # Rust
 target/
+
+# Certificates
+certs/blog.crt
+certs/blog.csr
+certs/blog.key
