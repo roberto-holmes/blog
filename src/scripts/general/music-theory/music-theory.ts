@@ -1,10 +1,19 @@
-import { initMidiDropdown } from "./midi.js";
-import { initGame } from "./dissonance-game.js";
+// import { initMidiDropdown } from "./midi.js";
+import { initGame, recover } from "./dissonance-game.js";
 
-initMidiDropdown(document.getElementById("midi-selector") as HTMLSelectElement);
+// initMidiDropdown(document.getElementById("midi-selector") as HTMLSelectElement);
 
 (document.getElementById("start-game") as HTMLElement).addEventListener("click", (_) => {
     initGame();
+});
+
+// (document.getElementById("recovery-code") as HTMLElement).addEventListener("input", (_) => {
+// TODO: Do we need to implement this to support mobile?
+// recover();
+// });
+
+(document.getElementById("recovery-code") as HTMLElement).addEventListener("keyup", (_) => {
+    recover();
 });
 
 let audioContext: AudioContext | null = null;
